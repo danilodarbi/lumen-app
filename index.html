@@ -678,6 +678,34 @@ tbody tr:last-child td{border-bottom:0}
 <script>
 const PALETTES = {"barbearia": {"a": "#D4A017", "ah": "#E0B028", "ad": "#8B6508", "as": "rgba(184,134,11,.09)", "ab": "rgba(184,134,11,.4)", "theme": "dark", "bg": "#0D0C09", "bg2": "#1a1612", "p1": "#121008", "p2": "#1a1612", "t0": "#F0EEE6", "t1": "#d4cfbe", "t2": "#8a8270", "t3": "#5a5448", "shadow": "rgba(184,134,11,0.25)", "accent2": "#B8860B", "label": "Barbearia"}, "clinica": {"a": "#0E8A8A", "ah": "#10ACAC", "ad": "#0A6666", "as": "rgba(14,138,138,.08)", "ab": "rgba(14,138,138,.35)", "theme": "light", "bg": "#F7FBFB", "bg2": "#EEF5F5", "p1": "#ffffff", "p2": "#F7FBFB", "t0": "#0A2A2A", "t1": "#1a4040", "t2": "#527272", "t3": "#7a9090", "shadow": "rgba(14,138,138,0.12)", "accent2": "#0A6666", "label": "Clínica"}, "salao": {"a": "#C2688A", "ah": "#D4809E", "ad": "#8B3D5F", "as": "rgba(194,104,138,.08)", "ab": "rgba(194,104,138,.35)", "theme": "light", "bg": "#FFF9FB", "bg2": "#FBEEF1", "p1": "#ffffff", "p2": "#FFF9FB", "t0": "#2A0A18", "t1": "#4a1830", "t2": "#6E4858", "t3": "#9a6878", "shadow": "rgba(194,104,138,0.15)", "accent2": "#8B3D5F", "label": "Salão"}, "petshop": {"a": "#2E8B57", "ah": "#38A868", "ad": "#1E6B40", "as": "rgba(46,139,87,.08)", "ab": "rgba(46,139,87,.35)", "theme": "light", "bg": "#F8FBF6", "bg2": "#EEF5EC", "p1": "#ffffff", "p2": "#F8FBF6", "t0": "#0A2412", "t1": "#1a3a25", "t2": "#527858", "t3": "#7a9885", "shadow": "rgba(46,139,87,0.15)", "accent2": "#1E6B40", "label": "Pet Shop"}, "odonto": {"a": "#2060C8", "ah": "#3070D8", "ad": "#1040A0", "as": "rgba(32,96,200,.08)", "ab": "rgba(32,96,200,.35)", "theme": "light", "bg": "#F8FAFE", "bg2": "#EDF1FB", "p1": "#ffffff", "p2": "#F8FAFE", "t0": "#08122A", "t1": "#1a2440", "t2": "#4A5878", "t3": "#7080a0", "shadow": "rgba(32,96,200,0.15)", "accent2": "#1040A0", "label": "Odonto"}, "academia": {"a": "#F07030", "ah": "#FF8540", "ad": "#A83C10", "as": "rgba(224,92,32,.1)", "ab": "rgba(224,92,32,.5)", "theme": "dark", "bg": "#0F0A06", "bg2": "#1f1208", "p1": "#140E08", "p2": "#1f1208", "t0": "#F8F0EC", "t1": "#d4c8be", "t2": "#9a7868", "t3": "#6a5040", "shadow": "rgba(224,92,32,0.3)", "accent2": "#E05C20", "label": "Academia"}, "outro": {"a": "#7D66DE", "ah": "#9080E8", "ad": "#5C45B8", "as": "rgba(110,86,207,.09)", "ab": "rgba(110,86,207,.35)", "theme": "dark", "bg": "#07080C", "bg2": "#0D0F14", "p1": "#0D0F14", "p2": "#12141A", "t0": "#F0EEF8", "t1": "#C8C6D4", "t2": "#7E7C90", "t3": "#52505F", "shadow": "rgba(110,86,207,0.25)", "accent2": "#6E56CF", "label": "Negócio"}};
 
+function getPaletteForBiz(biz) {
+  // Se o negócio tem customização, usar essas cores em cima da paleta do segmento
+  const base = getPalette(biz?.type);
+  if (!biz?.customColors) return base;
+  const c = biz.customColors;
+  const merged = Object.assign({}, base);
+  if (c.a) {
+    merged.a = c.a;
+    merged.ah = c.a;
+    merged.ad = c.a;
+    // recalcular as e ab a partir da cor
+    const r = parseInt(c.a.slice(1,3),16);
+    const g = parseInt(c.a.slice(3,5),16);
+    const bl = parseInt(c.a.slice(5,7),16);
+    merged.as = `rgba(${r},${g},${bl},0.1)`;
+    merged.ab = `rgba(${r},${g},${bl},0.35)`;
+    merged.shadow = `rgba(${r},${g},${bl},0.25)`;
+  }
+  if (c.bg) {
+    merged.bg = c.bg;
+    merged.bg2 = c.bg;
+    merged.p1 = c.bg;
+    merged.p2 = c.bg;
+  }
+  if (c.theme) merged.theme = c.theme;
+  return merged;
+}
+
 function getPalette(type) {
   if (!type) return PALETTES['outro'];
   const t = type.toLowerCase().replace(/[^a-z]/g,'');
@@ -694,9 +722,11 @@ function getPalette(type) {
   return PALETTES[key] || PALETTES['outro'];
 }
 
-function applyPalette(type, scope) {
-  // scope: 'portal' aplica tema completo (light/dark), 'panel' aplica só accent
-  const p = getPalette(type);
+function applyPalette(typeOrBiz, scope) {
+  // typeOrBiz pode ser string (type) ou objeto (biz com customColors)
+  const p = typeof typeOrBiz === 'object' && typeOrBiz !== null
+    ? getPaletteForBiz(typeOrBiz)
+    : getPalette(typeOrBiz);
   const r = document.documentElement.style;
   r.setProperty('--a', p.a);
   r.setProperty('--ah', p.ah);
@@ -1223,26 +1253,158 @@ function getDefaultAutomations() {
 }
 function openEditBiz(id) {
   const b = DB.businesses.find(x=>x.id===id); if(!b) return;
+  const p = getPalette(b.type);
+  const customColors = b.customColors || {};
+  const curA = customColors.a || p.a;
+  const curBg = customColors.bg || p.bg;
+  const curTheme = customColors.theme || p.theme;
+
   mdOpen(`${X_MD}
   <h2 class="md-h">Editar negócio</h2><p class="md-s">${b.name}</p>
+
   <div class="fld"><label class="fld-l">Nome</label><input class="fld-i" id="eb-n" value="${b.name}"></div>
   <div class="fld"><label class="fld-l">Endereço</label><input class="fld-i" id="eb-a" value="${b.addr}"></div>
   <div class="fld"><label class="fld-l">Telefone</label><input class="fld-i" id="eb-tel" value="${b.phone}"></div>
+
   <div class="f-row">
-    <div class="fld"><label class="fld-l">Nova senha (deixe vazio para manter)</label><input class="fld-i" id="eb-pass" placeholder="Nova senha (min. 6 caracteres)" autocomplete="new-password"></div>
+    <div class="fld"><label class="fld-l">Nova senha (vazio = manter)</label><input class="fld-i" id="eb-pass" placeholder="••••••••" autocomplete="new-password"></div>
     <div class="fld"><label class="fld-l">Status</label>
       <select class="fld-i fld-sl" id="eb-st"><option value="1" ${b.active?'selected':''}>Ativo</option><option value="0" ${!b.active?'selected':''}>Inativo</option></select>
     </div>
   </div>
-  <div style="background:var(--as);border:1px solid var(--ab);border-radius:var(--r3);padding:9px 12px;font-size:11.5px;margin-bottom:14px">
-    <strong style="color:var(--t0)">Credenciais atuais:</strong> ${b.login} / <span style="font-family:var(--mono)">${b.pass}</span>
+
+  <div style="background:var(--p2);border:1px solid var(--br);border-radius:var(--r3);padding:11px 13px;font-size:11.5px;margin-bottom:14px">
+    <strong style="color:var(--t0)">Credenciais:</strong> ${b.login} / <span style="font-family:var(--mono);color:var(--a)">${b.pass}</span>
   </div>
-  <div style="background:var(--as);border:1px solid var(--ab);border-radius:var(--r3);padding:9px 12px;font-size:11.5px;margin-bottom:14px">
-    <div class="m-l" style="margin-bottom:4px">Link de agendamento</div>
-    <div style="font-family:var(--mono);color:var(--a)">${window.location.origin}${window.location.pathname}#/agendar/${b.slug}</div>
+
+  <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--br)">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--a)"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+      <strong style="font-size:13px;color:var(--t0)">Personalização visual</strong>
+    </div>
+    <p style="font-size:11.5px;color:var(--t2);margin-bottom:14px;line-height:1.55">Ajuste as cores do painel e portal de agendamento deste negócio.</p>
+
+    <div style="background:linear-gradient(135deg,${p.as},transparent);border:1px solid ${p.ab};border-radius:var(--r3);padding:12px 14px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="width:8px;height:8px;border-radius:99px;background:${p.a};box-shadow:0 0 8px ${p.shadow}"></div>
+        <strong style="font-size:12px;color:var(--t0)">Sugestão para ${p.label}</strong>
+      </div>
+      <p style="font-size:11px;color:var(--t2);margin-bottom:8px;line-height:1.5">${getSegmentTip(b.type)}</p>
+      <button class="btn btn-g btn-xs" onclick="applySegmentDefault(${id})">Usar sugestão padrão</button>
+    </div>
+
+    <div class="f-row">
+      <div class="fld">
+        <label class="fld-l">Cor de destaque</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="color" id="eb-color-a" value="${curA}" style="width:42px;height:36px;border:1px solid var(--br);border-radius:6px;cursor:pointer;background:transparent;padding:2px">
+          <input class="fld-i" id="eb-color-a-hex" value="${curA}" style="flex:1;font-family:var(--mono);font-size:12px" oninput="syncColor('a')">
+        </div>
+      </div>
+      <div class="fld">
+        <label class="fld-l">Tema do painel</label>
+        <select class="fld-i fld-sl" id="eb-theme">
+          <option value="dark" ${curTheme==='dark'?'selected':''}>Escuro</option>
+          <option value="light" ${curTheme==='light'?'selected':''}>Claro</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fld">
+      <label class="fld-l">Cor de fundo (avançado)</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="color" id="eb-color-bg" value="${curBg}" style="width:42px;height:36px;border:1px solid var(--br);border-radius:6px;cursor:pointer;background:transparent;padding:2px">
+        <input class="fld-i" id="eb-color-bg-hex" value="${curBg}" style="flex:1;font-family:var(--mono);font-size:12px" oninput="syncColor('bg')">
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:var(--t3);margin-top:4px;line-height:1.5">
+      A cor de destaque aparece em botões, badges, links ativos.<br>
+      A cor de fundo é a base do painel — escolha clara para tema "claro" e escura para "escuro".
+    </div>
+
+    <div style="margin-top:14px">
+      <div class="fld-l" style="margin-bottom:6px">Pré-visualização</div>
+      <div id="eb-preview" style="background:${curBg};border-radius:var(--r3);padding:14px;border:1px solid var(--br)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:30px;height:30px;background:${curA};border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px">${ini(b.name)}</div>
+          <div style="font-size:12px;color:${curTheme==='light'?'#0A0A0A':'#fff'};font-weight:600">${b.name}</div>
+        </div>
+        <button style="background:${curA};color:#fff;border:0;border-radius:6px;padding:7px 14px;font-size:11px;font-weight:600;cursor:default">Botão de exemplo</button>
+      </div>
+    </div>
   </div>
+
   <button class="lo-btn" onclick="saveEditBiz(${id})">Salvar alterações</button>`);
+  // Sincronizar inputs de cor
+  setTimeout(setupColorSync, 100);
 }
+
+function getSegmentTip(type) {
+  const tips = {
+    'barbearia':'Tema escuro + dourado (#B8860B). Transmite premium masculino, noturno, artesanal. Referência: barbearias clássicas.',
+    'clinica':'Tema claro + turquesa (#0E8A8A). Saúde, modernidade, confiança. Off-white com toque azul-esverdeado.',
+    'salao':'Tema claro + rosa mauve (#C2688A). Feminino sofisticado, acolhedor. Creme com leve rosado.',
+    'petshop':'Tema claro + verde esmeralda (#2E8B57). Natureza, cuidado, alegria. Off-white esverdeado.',
+    'odonto':'Tema claro + azul cobalto (#2060C8). Precisão clínica, tecnologia. Branco com tint azul gelo.',
+    'academia':'Tema escuro + laranja fogo (#E05C20). Energia, força, intensidade. Dark quente.',
+    'outro':'Tema escuro + índigo (#6E56CF). Profissional, neutro, premium. Funciona para qualquer segmento.'
+  };
+  return tips[type] || tips['outro'];
+}
+
+function applySegmentDefault(id) {
+  const b = DB.businesses.find(x=>x.id===id); if(!b) return;
+  const p = getPalette(b.type);
+  document.getElementById('eb-color-a').value = p.a;
+  document.getElementById('eb-color-a-hex').value = p.a;
+  document.getElementById('eb-color-bg').value = p.bg;
+  document.getElementById('eb-color-bg-hex').value = p.bg;
+  document.getElementById('eb-theme').value = p.theme;
+  updatePreview();
+  toast('Sugestão aplicada','ok');
+}
+
+function setupColorSync() {
+  ['a','bg'].forEach(k => {
+    const c = document.getElementById('eb-color-'+k);
+    const h = document.getElementById('eb-color-'+k+'-hex');
+    if(c && h) {
+      c.addEventListener('input', () => { h.value = c.value; updatePreview(); });
+      h.addEventListener('input', () => { if(/^#[0-9A-Fa-f]{6}$/.test(h.value)){ c.value=h.value; updatePreview(); } });
+    }
+  });
+  const t = document.getElementById('eb-theme');
+  if(t) t.addEventListener('change', updatePreview);
+}
+
+function syncColor(k) {
+  const c = document.getElementById('eb-color-'+k);
+  const h = document.getElementById('eb-color-'+k+'-hex');
+  if(c && h && /^#[0-9A-Fa-f]{6}$/.test(h.value)) { c.value = h.value; updatePreview(); }
+}
+
+function updatePreview() {
+  const a = document.getElementById('eb-color-a-hex')?.value;
+  const bg = document.getElementById('eb-color-bg-hex')?.value;
+  const theme = document.getElementById('eb-theme')?.value;
+  const prev = document.getElementById('eb-preview');
+  if(!prev) return;
+  prev.style.background = bg;
+  const elements = prev.querySelectorAll('*');
+  elements.forEach(el => {
+    if(el.tagName === 'BUTTON') el.style.background = a;
+    if(el.style.background && el.tagName === 'DIV' && el.style.background.indexOf('rgb') < 0) {
+      if(el.style.borderRadius === '7px') el.style.background = a;
+    }
+    if(el.tagName === 'DIV' && !el.style.background.includes('rgb')) {
+      // text color based on theme
+    }
+  });
+  const textDiv = prev.querySelectorAll('div')[1]?.querySelectorAll('div')[1];
+  if(textDiv) textDiv.style.color = theme==='light' ? '#0A0A0A' : '#fff';
+}
+
 function saveEditBiz(id) {
   const b = DB.businesses.find(x=>x.id===id); if(!b) return;
   b.name = document.getElementById('eb-n').value.trim()||b.name;
@@ -1251,6 +1413,19 @@ function saveEditBiz(id) {
   const np = document.getElementById('eb-pass').value.trim();
   if (np.length>=6) b.pass=np;
   b.active = document.getElementById('eb-st').value==='1';
+
+  // Salvar customização visual
+  const ca = document.getElementById('eb-color-a-hex')?.value;
+  const cbg = document.getElementById('eb-color-bg-hex')?.value;
+  const ctheme = document.getElementById('eb-theme')?.value;
+  if (ca && cbg && ctheme) {
+    if (!b.customColors) b.customColors = {};
+    b.customColors.a = ca;
+    b.customColors.bg = cbg;
+    b.customColors.theme = ctheme;
+    b.color = ca; // atualizar cor principal
+  }
+
   mdClose(); renderRV(); toast('Negócio atualizado','ok');
 }
 function rvDeleteBiz(id) {
@@ -1281,8 +1456,8 @@ function copyBkLink() {
 /* --- ENTER BIZ APP --- */
 function enterBizApp() {
   const biz = getBiz();
-  // Aplicar tema completo do segmento
-  applyPalette(biz.type, 'portal');
+  // Aplicar tema completo (considera customColors)
+  applyPalette(biz, 'portal');
   // sidebar dinâmica por niche
   document.getElementById('sb-shopn').textContent = biz.name;
   const _p2 = getPalette(biz.type);
@@ -2215,8 +2390,8 @@ const BK = { biz:null, svc:null, pro:null, day:null, tm:null, fromDash:false };
 
 function openPortalFor(biz, fromDash=false) {
   BK.biz=biz; BK.fromDash=fromDash;
-  // Aplicar paleta do segmento no portal (tema completo)
-  applyPalette(biz.type, 'portal');
+  // Aplicar paleta (considera customColors)
+  applyPalette(biz, 'portal');
   // atualizar cabeçalho
   const av=document.getElementById('bk-av');
   av.textContent=ini(biz.name); av.style.background=biz.color;
