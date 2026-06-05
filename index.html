@@ -305,29 +305,23 @@ tbody tr:last-child td{border-bottom:0}
     <div class="lo-panel on" id="lp-rv">
       <h2 class="lo-h">Acesso de revendedor</h2>
       <p class="lo-s">Gerencie todos os negócios da sua carteira</p>
-      <div class="fld"><label class="fld-l">E-mail</label><input class="fld-i" id="rv-em" type="email" placeholder="revendedor@email.com" value="admin@lumen.app"></div>
-      <div class="fld"><label class="fld-l">Senha</label><input class="fld-i" id="rv-pw" type="password" placeholder="••••••••" value="lumen2025"></div>
+      <div class="fld"><label class="fld-l">E-mail</label><input class="fld-i" id="rv-em" type="text" placeholder="admin@lumen.app" autocomplete="off" onkeydown="if(event.key==='Enter')loginRV()"></div>
+      <div class="fld"><label class="fld-l">Senha</label><input class="fld-i" id="rv-pw" type="password" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')loginRV()"></div>
       <button class="lo-btn" onclick="loginRV()">Entrar como revendedor</button>
       <div class="lo-err" id="rv-err"></div>
-      <div class="lo-hint">
-        <strong>Demo:</strong> admin@lumen.app / lumen2025<br>
-        Aqui você cria contas para seus clientes e gerencia toda a carteira.
+      <div class="lo-hint" style="text-align:center">
+        Área restrita.<br>Entre com suas credenciais.
       </div>
     </div>
     <!-- painel negócio -->
     <div class="lo-panel" id="lp-biz">
       <h2 class="lo-h">Acesso do negócio</h2>
       <p class="lo-s">Entre com as credenciais que o revendedor criou para você</p>
-      <div class="fld"><label class="fld-l">Usuário</label><input class="fld-i" id="biz-em" placeholder="kowalski" value="kowalski"></div>
-      <div class="fld"><label class="fld-l">Senha</label><input class="fld-i" id="biz-pw" type="password" placeholder="••••••••" value="barbearia123"></div>
+      <div class="fld"><label class="fld-l">Usuário</label><input class="fld-i" id="biz-em" type="text" placeholder="ex: kowalski" autocomplete="off" onkeydown="if(event.key==='Enter')loginBiz()"></div>
+      <div class="fld"><label class="fld-l">Senha</label><input class="fld-i" id="biz-pw" type="password" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')loginBiz()"></div>
       <button class="lo-btn" onclick="loginBiz()">Entrar no painel</button>
       <div class="lo-err" id="biz-err"></div>
-      <div class="lo-hint">
-        <strong>Contas demo:</strong><br>
-        kowalski / barbearia123<br>
-        draclara / clinica456<br>
-        belezaarte / salao789
-      </div>
+
     </div>
   </div>
 </div>
@@ -481,6 +475,7 @@ tbody tr:last-child td{border-bottom:0}
     <div class="bk-step" id="b-s4">
       <h2 class="bk-q">A que horas?</h2>
       <p class="bk-sub">Horários disponíveis neste dia</p>
+      <div id="bk-dur-info" style="font-size:11px;color:var(--a);background:var(--as);border:1px solid var(--ab);border-radius:99px;padding:3px 11px;display:inline-block;margin-bottom:12px;font-weight:600"></div>
       <div class="tm-g" id="bk-tm-g"></div>
       <button class="b-btn" id="b-s4-b" disabled onclick="bkNext(4)">Continuar</button>
       <button class="b-bg" onclick="bkPrev(4)">Voltar</button>
@@ -540,13 +535,13 @@ tbody tr:last-child td{border-bottom:0}
   </div>
 </div>
 <script>
-/* ═══════════════════════════════════════════════
+/* ---════════════════════════════════════════════
    DATABASE CENTRAL — multi-negócio
    Cada negócio tem: slug, login, tipo, dados próprios
-═══════════════════════════════════════════════ */
+════════════════════════════════════════════--- */
 const DB = {
   // conta do revendedor
-  reseller: { email:'admin@lumen.app', pass:'lumen2025', name:'Danilo Lumen' },
+  reseller: { email:'admin@lumen.app', pass:'Lumen@Admin25', name:'Danilo Lumen' },
 
   // negócios cadastrados
   businesses: [
@@ -554,9 +549,9 @@ const DB = {
       id: 1,
       slug: 'kowalski',
       login: 'kowalski',
-      pass: 'barbearia123',
+      pass: 'K0walski#2025',
       type: 'barbearia',
-      name: 'Barbearia Kowalski',
+      name: 'Barbearia Kowalski', slotMin: 60,
       addr: 'Av. Beira-Mar, 142 · Guarapari · ES',
       phone: '(27) 99800-1234',
       active: true,
@@ -614,9 +609,9 @@ const DB = {
       id: 2,
       slug: 'draclara',
       login: 'draclara',
-      pass: 'clinica456',
+      pass: 'Clara#Est2025',
       type: 'clinica',
-      name: 'Clínica Dra. Clara',
+      name: 'Clínica Dra. Clara', slotMin: 60,
       addr: 'Rua das Flores, 88 · Vitória · ES',
       phone: '(27) 99700-5678',
       active: true,
@@ -667,9 +662,9 @@ const DB = {
       id: 3,
       slug: 'belezaarte',
       login: 'belezaarte',
-      pass: 'salao789',
+      pass: 'Beleza#Art2025',
       type: 'salao',
-      name: 'Beleza Arte Salão',
+      name: 'Beleza Arte Salão', slotMin: 60,
       addr: 'Alameda Principal, 55 · Guarapari · ES',
       phone: '(27) 99600-9012',
       active: true,
@@ -716,7 +711,7 @@ const DB = {
   ]
 };
 
-/* ═══ HELPERS ═══ */
+/* --- HELPERS --- */
 let _seq = 900;
 const nid = () => ++_seq;
 const rs = v => 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -730,13 +725,13 @@ const NICHE_CL = {barbearia:'ch-a',clinica:'ch-b',salao:'ch-v'};
 const X_BTN = '<button class="drw-x" onclick="drwClose()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>';
 const X_MD = '<button class="md-x" onclick="mdClose()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>';
 
-/* ═══ ESTADO DA SESSÃO ═══ */
+/* --- ESTADO DA SESSÃO --- */
 let SESSION = { role: null, biz: null }; // role: 'rv' | 'biz'
 let CUR_V = 'dash';
 
 function getBiz() { return SESSION.biz; }
 
-/* ═══ TOAST ═══ */
+/* --- TOAST --- */
 function toast(m, tp='ok') {
   const w = document.getElementById('ts'), t = document.createElement('div');
   t.className = 'toast';
@@ -747,7 +742,7 @@ function toast(m, tp='ok') {
   setTimeout(() => { t.style.transition='opacity .2s,transform .2s'; t.style.opacity='0'; t.style.transform='translateX(14px)'; setTimeout(()=>t.remove(),240); }, 2800);
 }
 
-/* ═══ MODAL / DRAWER ═══ */
+/* --- MODAL / DRAWER --- */
 function mdOpen(html) { document.getElementById('md').innerHTML=html; document.getElementById('md-bg').classList.add('on'); }
 function mdClose() { document.getElementById('md-bg').classList.remove('on'); }
 function drwOpen(html) { document.getElementById('drw').innerHTML=html; document.getElementById('drw').classList.add('on'); document.getElementById('drw-bg').classList.add('on'); }
@@ -756,7 +751,7 @@ function confirmDel(msg, fn) {
   mdOpen(`${X_MD}<h2 class="md-h" style="margin-top:4px">Confirmar exclusão</h2><div style="background:var(--rs);border:1px solid var(--rb);border-radius:var(--r3);padding:12px;margin:14px 0;font-size:12.5px;color:var(--t1);line-height:1.6">${msg}</div><div style="display:flex;gap:8px"><button class="btn btn-g" style="flex:1;justify-content:center" onclick="mdClose()">Cancelar</button><button class="btn btn-r" style="flex:1;justify-content:center" onclick="mdClose();(${fn})()">Excluir</button></div>`);
 }
 
-/* ═══ LOGIN ═══ */
+/* --- LOGIN --- */
 function loTab(t) {
   document.querySelectorAll('.lo-tab').forEach((el,i) => el.classList.toggle('on', (i===0&&t==='rv')||(i===1&&t==='biz')));
   document.getElementById('lp-rv').classList.toggle('on', t==='rv');
@@ -800,7 +795,7 @@ function logoutBiz() {
   document.getElementById('s-auth').classList.add('on');
 }
 
-/* ═══ PAINEL REVENDEDOR ═══ */
+/* --- PAINEL REVENDEDOR --- */
 function renderRV() {
   const bizs = DB.businesses;
   const active = bizs.filter(b=>b.active).length;
@@ -924,6 +919,7 @@ function saveNewBiz() {
     id:nid(), slug:login, login, pass, type, name:n,
     addr:`${city||'Brasil'}`, phone:tel||'', active:true,
     color:COLORS[type]||'#5A8DC4',
+    slotMin: 60,
     clients:[], agenda:[], services:getDefaultServices(type),
     pros:[], automations:getDefaultAutomations(), transactions:[], reviews:[], notifs:[]
   });
@@ -988,7 +984,7 @@ function copyBkLink() {
   toast('Link copiado!','ok');
 }
 
-/* ═══ ENTER BIZ APP ═══ */
+/* --- ENTER BIZ APP --- */
 function enterBizApp() {
   const biz = getBiz();
   // sidebar dinâmica por niche
@@ -1051,7 +1047,7 @@ function updSbCounts() {
 }
 
 
-/* ═══ NAVEGAÇÃO ═══ */
+/* --- NAVEGAÇÃO --- */
 const VT = {dash:'Dashboard',hoje:'O que fazer hoje',agenda:'Agenda',opp:'Oportunidades',ai:'IA de Negócios',clientes:'Clientes',recor:'Recorrência',aval:'Avaliações',mkt:'Marketing',auto:'Automações',svc:'Serviços',est:'Estoque',eqp:'Equipe',fin:'Financeiro',rel:'Relatórios',config:'Configurações'};
 function go(v) {
   CUR_V = v;
@@ -1085,7 +1081,7 @@ function abrirPortal() {
   openPortalFor(biz, true);
 }
 
-/* ═══ CMD PALETTE ═══ */
+/* --- CMD PALETTE --- */
 const CMD = () => [
   {g:'Ir para',items:[{t:'Dashboard',v:'dash'},{t:'O que fazer hoje',v:'hoje'},{t:'Agenda',v:'agenda'},{t:'Oportunidades',v:'opp'},{t:'IA de Negócios',v:'ai'},{t:'Clientes',v:'clientes'},{t:'Recorrência',v:'recor'},{t:'Avaliações',v:'aval'},{t:'Marketing',v:'mkt'},{t:'Automações',v:'auto'},{t:'Serviços',v:'svc'},{t:'Estoque',v:'est'},{t:'Equipe',v:'eqp'},{t:'Financeiro',v:'fin'},{t:'Relatórios',v:'rel'},{t:'Configurações',v:'config'}]},
   {g:'Criar',items:[{t:'Novo agendamento',a:'openNewAppt()'},{t:'Novo cliente',a:'openNewClient()'},{t:'Novo serviço',a:'openNewSvc()'},{t:'Novo lançamento',a:'openNewTx()'}]},
@@ -1115,7 +1111,7 @@ function copiarLink() {
 }
 function verQR() { cpClose(); openQR(); }
 
-/* ═══ NOTIFICAÇÕES ═══ */
+/* --- NOTIFICAÇÕES --- */
 function openNotif() {
   const biz = getBiz(); if (!biz) return;
   biz.notifs.forEach(n => n.read = true);
@@ -1132,7 +1128,7 @@ function openNotif() {
     </div>`);
 }
 
-/* ═══ DASHBOARD ═══ */
+/* --- DASHBOARD --- */
 function vDash() {
   const biz = getBiz();
   const hoje = biz.agenda.filter(a => a.dt==='02/06/2025' && a.st!=='cancelado');
@@ -1219,7 +1215,7 @@ function vDash() {
   </div>`;
 }
 
-/* ═══ QR CODE ═══ */
+/* --- QR CODE --- */
 function openQR() {
   const biz = getBiz(); if (!biz) return;
   const url = `lumen.app/agendar/${biz.slug}`;
@@ -1251,49 +1247,111 @@ function openQR() {
     </div>`);
 }
 
-/* ═══ AGENDA ═══ */
+/* --- AGENDA --- */
 function vAgenda() {
   const biz = getBiz();
   const dias = [['SEG','02',true],['TER','03'],['QUA','04'],['QUI','05'],['SEX','06'],['SÁB','07']];
-  const tms = ['08:00','09:00','10:00','11:00','14:00','15:00','16:00','17:00','18:00'];
+  const tms = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30',
+               '13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
   const mapa = {};
-  biz.agenda.forEach(a => { const k=`${a.dt.split('/')[0]}_${a.tm}`; if(!mapa[k])mapa[k]=[]; mapa[k].push(a); });
-  let grid = '<div style=""></div>';
-  dias.forEach(([d,n,t]) => grid += `<div style="background:var(--p1);padding:9px 8px;text-align:center;border-bottom:1px solid var(--br)"><div style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:${t?'var(--a)':'var(--t3)'}">${d}</div><div style="font-size:14px;font-weight:600;margin-top:2px;color:${t?'var(--a)':'var(--t0)'};">${n}</div></div>`);
+  biz.agenda.forEach(a => {
+    const k = a.dt.split('/')[0] + '_' + a.tm;
+    if(!mapa[k]) mapa[k] = [];
+    mapa[k].push(a);
+  });
+  const proColors = [
+    {bg:'var(--gs)',c:'var(--g)',br:'var(--gb)'},
+    {bg:'var(--as)',c:'var(--a)',br:'var(--ab)'},
+    {bg:'var(--bs)',c:'var(--b)',br:'var(--bb)'},
+    {bg:'var(--vs)',c:'var(--v)',br:'var(--vb)'},
+  ];
+  let cells = '';
+  // Header vazio no canto
+  cells += '<div style="background:var(--p1);border-bottom:1px solid var(--br)"></div>';
+  // Headers dos dias
+  dias.forEach(([d,n,t]) => {
+    const col = t ? 'var(--a)' : 'var(--t0)';
+    const colD = t ? 'var(--a)' : 'var(--t3)';
+    cells += `<div style="background:var(--p1);padding:9px 8px;text-align:center;border-bottom:1px solid var(--br)">
+      <div style="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:${colD}">${d}</div>
+      <div style="font-size:14px;font-weight:600;margin-top:2px;color:${col}">${n}</div>
+    </div>`;
+  });
+  // Linhas de horário
   tms.forEach(tm => {
-    grid += `<div style="background:var(--p1);padding:6px;font-family:var(--mono);font-size:9.5px;color:var(--t3);text-align:right">${tm}</div>`;
+    cells += `<div style="background:var(--p1);padding:6px 4px;font-family:var(--mono);font-size:9px;color:var(--t3);text-align:right;white-space:nowrap">${tm}</div>`;
     dias.forEach(([d,n]) => {
-      const evs = (mapa[`${n}_${tm}`]||[]).filter(a=>a.st!=='cancelado');
+      const evs = (mapa[n + '_' + tm] || []).filter(a => a.st !== 'cancelado');
       if (evs.length) {
-        grid += `<div style="background:var(--bg);padding:2px;min-height:52px;cursor:pointer" onclick="openApptDetail(${evs[0].id})"><div style="padding:4px 6px;border-radius:4px;font-size:10px;font-weight:600;background:var(--gs);color:var(--g);border:1px solid var(--gb);height:100%">${evs[0].cn.split(' ')[0]}<div style="font-size:9px;opacity:.75;margin-top:1px">${evs[0].sv.split(' ')[0]}</div></div></div>`;
+        const ev = evs[0];
+        const pi = biz.pros.findIndex(p => p.n === ev.pro);
+        const ec = proColors[pi >= 0 ? pi % proColors.length : 0];
+        const durMin = Math.round((ev.dur||30)/30);
+        const h = 52 * Math.max(1, durMin);
+        cells += `<div style="background:var(--bg);padding:2px;min-height:${h}px;cursor:pointer" onclick="openApptDetail(${ev.id})">
+          <div style="padding:4px 6px;border-radius:4px;font-size:10px;font-weight:600;background:${ec.bg};color:${ec.c};border:1px solid ${ec.br};height:100%">
+            ${ev.cn.split(' ')[0]}
+            <div style="font-size:9px;opacity:.75;margin-top:1px">${ev.sv.split(' ').slice(0,2).join(' ')}</div>
+            <div style="font-size:9px;opacity:.6;margin-top:1px">${ev.dur||'?'}min</div>
+          </div>
+        </div>`;
       } else {
-        grid += `<div style="background:var(--bg);padding:2px;min-height:52px;cursor:pointer;transition:background .1s" onclick="openNewApptAt('${n}/06/2025','${tm}')" onmouseenter="this.style.background='var(--p3)'" onmouseleave="this.style.background='var(--bg)'"></div>`;
+        cells += `<div style="background:var(--bg);padding:2px;min-height:52px;cursor:pointer;transition:background .08s"
+          onclick="openNewApptAt('${n}/06/2025','${tm}')"
+          onmouseenter="this.style.background='var(--p3)'"
+          onmouseleave="this.style.background=''"
+        ></div>`;
       }
     });
   });
+  const hojeAppts = biz.agenda.filter(a => a.dt === '02/06/2025' && a.st !== 'cancelado');
   return `
   <div class="ph"><div class="ph-r">
-    <div><h1 class="ph-h">Agenda</h1><p class="ph-s">Semana de 2 a 7 de junho · ${biz.agenda.filter(a=>a.st!=='cancelado').length} agendamentos</p></div>
-    <button class="btn btn-p btn-sm" onclick="openNewAppt()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Novo agendamento</button>
+    <div><h1 class="ph-h">Agenda</h1><p class="ph-s">Semana de 2–7 de junho · ${biz.agenda.filter(a=>a.st!=='cancelado').length} agendamentos</p></div>
+    <button class="btn btn-p btn-sm" onclick="openNewAppt()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Novo agendamento
+    </button>
   </div></div>
   <div class="g2">
     <div style="overflow-x:auto">
-      <div style="display:grid;grid-template-columns:44px repeat(6,1fr);gap:1px;background:var(--br);border:1px solid var(--br);border-radius:var(--r4);overflow:hidden;min-width:500px">${grid}</div>
+      <div style="display:grid;grid-template-columns:44px repeat(6,1fr);gap:1px;background:var(--br);border:1px solid var(--br);border-radius:var(--r4);overflow:hidden;min-width:480px">
+        ${cells}
+      </div>
     </div>
-    <div class="c">
-      <div class="c-h"><div class="c-t">Hoje</div><span class="ch ch-g">${biz.agenda.filter(a=>a.dt==='02/06/2025'&&a.st!=='cancelado').length}</span></div>
-      <div>
-        ${biz.agenda.filter(a=>a.dt==='02/06/2025'&&a.st!=='cancelado').map(a=>`
-          <div style="display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;transition:background .1s" onmouseenter="this.style.background='var(--p2)'" onmouseleave="this.style.background=''" onclick="openApptDetail(${a.id})">
-            <span style="font-family:var(--mono);font-size:10px;color:var(--t3);width:36px">${a.tm}</span>
-            <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--t0)">${a.cn}</div><div style="font-size:10.5px;color:var(--t3)">${a.sv}</div></div>
-            <span class="ch ch-${a.st==='confirmado'?'g':'a'}" style="font-size:9px">${a.st==='confirmado'?'✓':'⏳'}</span>
+    <div class="stk">
+      <div class="c">
+        <div class="c-h"><div class="c-t">Hoje</div><span class="ch ch-g">${hojeAppts.length}</span></div>
+        <div>
+          ${hojeAppts.map(a => `
+            <div style="display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;transition:background .08s"
+              onmouseenter="this.style.background='var(--p2)'"
+              onmouseleave="this.style.background=''"
+              onclick="openApptDetail(${a.id})">
+              <span style="font-family:var(--mono);font-size:10px;color:var(--t3);width:36px">${a.tm}</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12.5px;font-weight:600;color:var(--t0)">${a.cn}</div>
+                <div style="font-size:10.5px;color:var(--t3)">${a.sv} · ${a.dur}min</div>
+              </div>
+              <span class="ch ch-${a.st==='confirmado'?'g':'a'}" style="font-size:9px">${a.st==='confirmado'?'✓':'⏳'}</span>
+            </div>`).join('')}
+          ${!hojeAppts.length ? `<div style="padding:18px;text-align:center;color:var(--t3);font-size:12px">
+            Sem agendamentos hoje<br>
+            <button class="btn btn-p btn-sm" style="margin-top:10px" onclick="openNewAppt()">Agendar agora</button>
+          </div>` : ''}
+        </div>
+      </div>
+      <div class="c c-p">
+        <div class="m-l" style="margin-bottom:10px">Legenda da equipe</div>
+        ${biz.pros.slice(0,4).map((p,i) => `
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+            <div style="width:10px;height:10px;border-radius:2px;background:${proColors[i%proColors.length].bg};border:1px solid ${proColors[i%proColors.length].br};flex-shrink:0"></div>
+            <span style="font-size:12px;color:var(--t1)">${p.n}</span>
           </div>`).join('')}
-        ${!biz.agenda.filter(a=>a.dt==='02/06/2025'&&a.st!=='cancelado').length ? `<div style="padding:18px;text-align:center;color:var(--t3);font-size:12px">Sem agendamentos<br><button class="btn btn-p btn-sm" style="margin-top:10px" onclick="openNewAppt()">Agendar</button></div>` : ''}
       </div>
     </div>
   </div>`;
 }
+
 function openApptDetail(id) {
   const biz = getBiz();
   const a = biz.agenda.find(x=>x.id===id); if (!a) return;
@@ -1332,14 +1390,31 @@ function openNewAppt(dt,tm) {
     <h2 class="md-h">Novo agendamento</h2><p class="md-s">Criar manualmente</p>
     <div class="fld"><label class="fld-l">Cliente</label><select class="fld-i fld-sl" id="na-cid"><option value="">Selecionar…</option>${clis}</select></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="fld"><label class="fld-l">Serviço</label><select class="fld-i fld-sl" id="na-svc">${svcs}</select></div>
+      <div class="fld"><label class="fld-l">Serviço</label><select class="fld-i fld-sl" id="na-svc" onchange="previewApptDur(this)">${svcs}</select></div>
       <div class="fld"><label class="fld-l">Profissional</label><select class="fld-i fld-sl" id="na-pro">${pros}</select></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
       <div class="fld"><label class="fld-l">Data</label><input class="fld-i" type="date" id="na-dt" value="${dt?dt.split('/').reverse().join('-'):'2025-06-02'}"></div>
       <div class="fld"><label class="fld-l">Horário</label><input class="fld-i" type="time" id="na-tm" value="${tm||'14:00'}"></div>
+      <div class="fld"><label class="fld-l">Duração (min)</label><input class="fld-i" type="number" id="na-dur" value="60" min="5" step="5"></div>
     </div>
+    <div id="na-dur-preview" style="font-size:11.5px;color:var(--t2);margin-bottom:10px"></div>
     <button class="lo-btn" onclick="saveNewAppt()">Criar agendamento</button>`);
+}
+function previewApptDur(sel) {
+  const biz = getBiz(); if(!biz) return;
+  const svcId = parseInt(sel.value);
+  const sv = biz.services.find(x=>x.id===svcId);
+  const durField = document.getElementById('na-dur');
+  const preview = document.getElementById('na-dur-preview');
+  if (sv) {
+    if(durField) durField.value = sv.dur;
+    if(preview) {
+      const h = Math.floor(sv.dur/60), m = sv.dur%60;
+      const durStr = h>0 ? `${h}h${m>0?m+'min':''}` : `${m} min`;
+      preview.textContent = `${sv.n} · ${durStr} · ${rs(sv.p)}`;
+    }
+  }
 }
 function saveNewAppt() {
   const biz = getBiz();
@@ -1348,14 +1423,31 @@ function saveNewAppt() {
   const proId = parseInt(document.getElementById('na-pro').value);
   const dt = document.getElementById('na-dt').value;
   const tm = document.getElementById('na-tm').value;
+  const durVal = parseInt(document.getElementById('na-dur')?.value) || 60;
   if (!cid) { toast('Selecione um cliente','err'); return; }
   const c = biz.clients.find(x=>x.id===cid);
   const sv = biz.services.find(x=>x.id===svcId);
   const pr = biz.pros.find(x=>x.id===proId);
-  if (!c||!sv) return;
+  if (!c||!sv) { toast('Selecione serviço e cliente','err'); return; }
+  // Verificar conflito de horário
   const p = dt.split('-');
-  biz.agenda.push({id:nid(),cid,cn:c.n,sv:sv.n,pro:pr?pr.n:'—',dt:`${p[2]}/${p[1]}/${p[0]}`,tm,st:'confirmado',p:sv.p,dur:sv.dur});
-  mdClose(); rerender(); toast(`Agendado: ${c.n}`,'ok');
+  const dtFmt = `${p[2]}/${p[1]}/${p[0]}`;
+  const tmMin = parseInt(tm.split(':')[0])*60 + parseInt(tm.split(':')[1]);
+  const conflict = biz.agenda.find(a => {
+    if (a.dt !== dtFmt || a.st === 'cancelado') return false;
+    const aMin = parseInt(a.tm.split(':')[0])*60 + parseInt(a.tm.split(':')[1]);
+    return tmMin < aMin+(a.dur||60) && tmMin+durVal > aMin;
+  });
+  if (conflict) {
+    toast(`Conflito com ${conflict.cn} às ${conflict.tm}`,'err');
+    return;
+  }
+  biz.agenda.push({
+    id:nid(), cid, cn:c.n, sv:sv.n,
+    pro: pr?pr.n:'—', dt:dtFmt, tm,
+    st:'confirmado', p:sv.p, dur:durVal
+  });
+  mdClose(); rerender(); toast(`Agendado: ${c.n} — ${tm} (${durVal}min)`,'ok');
 }
 function whatsapp(name, phone) {
   const msg = encodeURIComponent(`Oi ${name.split(' ')[0]}, tudo bem? Passando para avisar sobre seu horário. Qualquer dúvida estamos aqui!`);
@@ -1363,7 +1455,7 @@ function whatsapp(name, phone) {
 }
 
 
-/* ═══ CLIENTES ═══ */
+/* --- CLIENTES --- */
 let CLI_Q = '', CLI_F = 'all';
 function vClientes() {
   const biz = getBiz();
@@ -1490,7 +1582,7 @@ function exportClients() {
   URL.revokeObjectURL(url); toast('CSV exportado','ok');
 }
 
-/* ═══ AVALIAÇÕES ═══ */
+/* --- AVALIAÇÕES --- */
 function vAval() {
   const biz = getBiz();
   const pending = biz.reviews.filter(r=>!r.resp);
@@ -1550,7 +1642,7 @@ function aiResp(id, stars) {
   toast('Resposta sugerida pela IA','ok');
 }
 
-/* ═══ SERVIÇOS ═══ */
+/* --- SERVIÇOS --- */
 function vSvc() {
   const biz = getBiz();
   const label = biz.type==='clinica'?'procedimentos':'serviços';
@@ -1617,7 +1709,7 @@ function deleteSvc(i) {
   confirmDel(`Excluir <strong>"${s.n}"</strong>?`,`()=>{getBiz().services.splice(${i},1);rerender();updSbCounts();toast('Excluído','ok')}`);
 }
 
-/* ═══ AUTOMAÇÕES ═══ */
+/* --- AUTOMAÇÕES --- */
 function vAuto() {
   const biz = getBiz();
   return `
@@ -1678,7 +1770,7 @@ function deleteAuto(id) {
   confirmDel(`Excluir <strong>"${a.n}"</strong>?`,`()=>{const biz=getBiz();biz.automations=biz.automations.filter(x=>x.id!==${id});rerender();updSbCounts();toast('Excluída','ok')}`);
 }
 
-/* ═══ FINANCEIRO ═══ */
+/* --- FINANCEIRO --- */
 let FIN_F = 'todos';
 function vFin() {
   const biz = getBiz();
@@ -1737,7 +1829,14 @@ function saveNewTx() {
 }
 function deleteTx(i) { confirmDel('Excluir este lançamento?',`()=>{getBiz().transactions.splice(${i},1);rerender();toast('Removido','ok')}`); }
 
-/* ═══ CONFIG ═══ */
+/* --- CONFIG --- */
+function genSlotOptions(current) {
+  const opts = [
+    [15,'15 min'],[20,'20 min'],[30,'30 min'],[45,'45 min'],
+    [60,'60 min (1h)'],[90,'90 min (1h30)'],[120,'120 min (2h)']
+  ];
+  return opts.map(([v,l]) => '<option value="'+v+'"'+(current===v?' selected':'')+'>'+l+'</option>').join('');
+}
 function vConfig() {
   const biz = getBiz();
   const slug = biz.slug;
@@ -1750,6 +1849,13 @@ function vConfig() {
         <div class="fld"><label class="fld-l">Nome</label><input class="fld-i" id="cfg-n" value="${biz.name}"></div>
         <div class="fld"><label class="fld-l">Endereço</label><input class="fld-i" id="cfg-a" value="${biz.addr}"></div>
         <div class="fld"><label class="fld-l">Telefone</label><input class="fld-i" id="cfg-tel" value="${biz.phone}"></div>
+        <div class="fld">
+          <label class="fld-l">Intervalo de agendamento (minutos)</label>
+          <select class="fld-i fld-sl" id="cfg-slot">
+            ${genSlotOptions(biz.slotMin||60)}
+          </select>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px">Define o espaçamento entre horários no portal de agendamento</div>
+        </div>
         <button class="btn btn-p" onclick="saveCfg()">Salvar</button>
       </div>
       <div class="c c-p">
@@ -1788,9 +1894,11 @@ function vConfig() {
 }
 function saveCfg() {
   const biz=getBiz();
-  biz.name=document.getElementById('cfg-n').value.trim()||biz.name;
-  biz.addr=document.getElementById('cfg-a').value.trim();
-  biz.phone=document.getElementById('cfg-tel').value.trim();
+  biz.name=document.getElementById('cfg-n')?.value.trim()||biz.name;
+  biz.addr=document.getElementById('cfg-a')?.value.trim()||biz.addr;
+  biz.phone=document.getElementById('cfg-tel')?.value.trim()||biz.phone;
+  const slot=parseInt(document.getElementById('cfg-slot')?.value);
+  if(slot>0) biz.slotMin=slot;
   document.getElementById('sb-shopn').textContent=biz.name;
   document.getElementById('tb-shop').textContent=biz.name;
   toast('Configurações salvas','ok');
@@ -1804,7 +1912,7 @@ function savePw() {
 }
 
 
-/* ═══ PORTAL DE AGENDAMENTO ═══ */
+/* --- PORTAL DE AGENDAMENTO --- */
 const BK = { biz:null, svc:null, pro:null, day:null, tm:null, fromDash:false };
 
 function openPortalFor(biz, fromDash=false) {
@@ -1910,12 +2018,63 @@ function renderDays() {
 function pickDay(d) { BK.day=d; renderDays(); document.getElementById('b-s3-b').disabled=false; }
 function renderTimes() {
   const g=document.getElementById('bk-tm-g'); if(!g||!BK.biz) return;
-  const all=['08:00','09:00','09:30','10:00','10:30','11:00','14:00','14:30','15:00','15:30','16:00','17:00','18:00'];
-  const taken=BK.biz.agenda.filter(a=>a.dt&&parseInt(a.dt.split('/')[0])===BK.day).map(a=>a.tm);
-  g.innerHTML=all.map(t=>{
-    const unavail=taken.includes(t);
-    return `<div class="tm${BK.tm===t?' sel':''}${unavail?' un':''}" onclick="${!unavail?`pickTm('${t}')`:''}">${t}</div>`;
+  // Usar intervalo configurado no negócio (default 60 min)
+  const dur = BK.biz.slotMin || 60;
+  const sv = BK.biz.services.find(x=>x.id===BK.svc);
+
+  // Gerar slots do horário de funcionamento com base na duração
+  // Horário: 08:00 às 20:00 (720 min de abertura)
+  const startH = 8, endH = 20;
+  const slots = [];
+  for (let h = startH; h < endH; h++) {
+    for (let m = 0; m < 60; m += dur) {
+      if (h * 60 + m + dur <= endH * 60) {
+        const hh = String(h).padStart(2,'0');
+        const mm = String(m).padStart(2,'0');
+        slots.push(`${hh}:${mm}`);
+      }
+    }
+  }
+
+  // Verificar quais horários estão ocupados considerando duração
+  const dayAppts = BK.biz.agenda.filter(a =>
+    a.dt && parseInt(a.dt.split('/')[0]) === BK.day && a.st !== 'cancelado'
+  );
+
+  function toMin(t) {
+    const [h,m] = t.split(':').map(Number);
+    return h*60+m;
+  }
+  function isBlocked(slot) {
+    const slotStart = toMin(slot);
+    const slotEnd = slotStart + dur;
+    return dayAppts.some(a => {
+      const aStart = toMin(a.tm);
+      const aEnd = aStart + (a.dur || 60);
+      // Conflito se os intervalos se sobrepõem
+      return slotStart < aEnd && slotEnd > aStart;
+    });
+  }
+
+  const now = new Date();
+  const todayDay = now.getDate();
+  const currentMin = now.getHours()*60 + now.getMinutes();
+
+  g.innerHTML = slots.map(t => {
+    const blocked = isBlocked(t);
+    // Bloquear horários já passados se for hoje
+    const isPast = BK.day === todayDay && toMin(t) <= currentMin;
+    const unavail = blocked || isPast;
+    return `<div class="tm${BK.tm===t?' sel':''}${unavail?' un':''}"
+      onclick="${!unavail?`pickTm('${t}')`:''}"
+      title="${blocked?'Ocupado':isPast?'Horário passado':dur+' min'}">
+      ${t}
+    </div>`;
   }).join('');
+
+  // Mostrar info da duração
+  const info = document.getElementById('bk-dur-info');
+  if(info) info.textContent = `Slots de ${dur} minutos · ${sv?.n||''}`;
 }
 function pickTm(t) {
   BK.tm=t;
@@ -1952,7 +2111,7 @@ function bkConfirm() {
 }
 
 
-/* ══ HOJE ══ */
+/* -- HOJE -- */
 function vHoje(){
   const biz=getBiz();
   const risk=biz.clients.filter(c=>c.nx<-14);
@@ -1984,7 +2143,7 @@ function execStep(n,fn){fn();const el=document.getElementById('hoje-'+n);if(el){
 function execAll(){for(let i=1;i<=5;i++){const el=document.getElementById('hoje-'+i);if(el){el.style.opacity='.38';el.style.pointerEvents='none';const b=el.querySelector('.btn');if(b)b.textContent='✓ Feito'}}toast('Todas as ações executadas','ok')}
 function contactRisk(){const biz=getBiz();biz.clients.filter(c=>c.nx<-14).forEach(c=>whatsapp(c.n,c.ph));toast('WhatsApp aberto para clientes em risco','ok')}
 
-/* ══ OPORTUNIDADES ══ */
+/* -- OPORTUNIDADES -- */
 function vOpp(){
   const biz=getBiz();
   const risk=biz.clients.filter(c=>c.nx<-14);
@@ -2006,7 +2165,7 @@ function vOpp(){
   </div>`;
 }
 
-/* ══ IA ══ */
+/* -- IA -- */
 const AIDB={
   'risco':`<p>Analisando clientes em risco no seu negócio:</p><div style="background:var(--p2);border:1px solid var(--br);border-radius:var(--r3);padding:11px 14px;margin:9px 0">${()=>{const biz=getBiz();return biz?biz.clients.filter(c=>c.nx<0).slice(0,4).map(c=>`<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12.5px"><span style="color:var(--t3)">${c.n}</span><span style="color:var(--t0);font-weight:600">${Math.abs(c.nx)}d sem visita</span></div>`).join(''):''}}</div><p>Recomendo WhatsApp imediato com oferta de 15% off.</p>`,
 };
@@ -2057,7 +2216,7 @@ function aiAsk(q){
   },520);
 }
 
-/* ══ RECORRÊNCIA ══ */
+/* -- RECORRÊNCIA -- */
 function vRecor(){
   const biz=getBiz();
   if(!biz.plans)biz.plans=[{id:1,n:'Plano Gold',p:89,desc:'2 serviços/mês · sem fila',sub:Math.min(3,biz.clients.length),mrr:0},{id:2,n:'Plano Black',p:189,desc:'Ilimitado · prioridade',sub:Math.min(2,biz.clients.length),mrr:0}];
@@ -2096,7 +2255,7 @@ function openEditPlan(id){const biz=getBiz();if(!biz.plans)return;const p=biz.pl
 function saveEditPlan(id){const biz=getBiz();if(!biz.plans)return;const p=biz.plans.find(x=>x.id===id);if(!p)return;p.n=document.getElementById('ep-n').value.trim()||p.n;const nv=parseFloat(document.getElementById('ep-p').value);if(nv>0)p.p=nv;const ns=parseInt(document.getElementById('ep-s').value);if(ns>=0)p.sub=ns;p.desc=document.getElementById('ep-d').value.trim();p.mrr=p.p*p.sub;mdClose();rerender();toast('Plano atualizado','ok')}
 function deletePlan(id){const biz=getBiz();if(!biz.plans)return;const p=biz.plans.find(x=>x.id===id);if(!p)return;confirmDel(`Excluir plano <strong>"${p.n}"</strong>?`,`()=>{const biz=getBiz();biz.plans=biz.plans.filter(x=>x.id!==${id});rerender();toast('Plano excluído','ok')}`)}
 
-/* ══ MARKETING ══ */
+/* -- MARKETING -- */
 function vMkt(){
   const biz=getBiz();
   if(!biz.campaigns)biz.campaigns=[{id:1,n:'Reativação 30d',seg:'Inativos +30d',canal:'WhatsApp',msg:'Oi {nome}, saudades! 15% off.',open:58,conv:18,rev:720,st:'ativa'},{id:2,n:'Aniversariantes',seg:'Aniversário do mês',canal:'WhatsApp',msg:'Feliz aniversário, {nome}! 20% off.',open:74,conv:8,rev:520,st:'pausada'}];
@@ -2124,7 +2283,7 @@ function saveNewCamp(){const biz=getBiz();if(!biz.campaigns)biz.campaigns=[];con
 function toggleCamp(id){const biz=getBiz();if(!biz.campaigns)return;const c=biz.campaigns.find(x=>x.id===id);if(!c)return;c.st=c.st==='ativa'?'pausada':'ativa';rerender();toast(`Campanha ${c.st}`,'ok')}
 function deleteCamp(id){const biz=getBiz();if(!biz.campaigns)return;const c=biz.campaigns.find(x=>x.id===id);if(!c)return;confirmDel(`Excluir campanha <strong>"${c.n}"</strong>?`,`()=>{const biz=getBiz();biz.campaigns=biz.campaigns.filter(x=>x.id!==${id});rerender();toast('Excluída','ok')}`)}
 
-/* ══ ESTOQUE ══ */
+/* -- ESTOQUE -- */
 function vEst(){
   const biz=getBiz();
   if(!biz.stock)biz.stock=[{id:1,n:'Pomada Premium 100g',qt:12,min:30,unit:'un'},{id:2,n:'Cera Modeladora',qt:3,min:20,unit:'un'},{id:3,n:'Óleo de Barba',qt:8,min:15,unit:'un'},{id:4,n:'Shampoo 500ml',qt:24,min:40,unit:'un'},{id:5,n:'Toalha Descartável',qt:1,min:5,unit:'pct'}];
@@ -2153,7 +2312,7 @@ function openRepor(i){const biz=getBiz();if(!biz.stock)return;const s=biz.stock[
 function doRepor(i){const biz=getBiz();if(!biz.stock)return;const qty=parseInt(document.getElementById('rp-q').value)||0;if(qty<=0){toast('Quantidade inválida','err');return}biz.stock[i].qt+=qty;mdClose();rerender();updSbCounts();toast(`+${qty} ${biz.stock[i].unit} adicionado(s)`,'ok')}
 function deleteStock(i){const biz=getBiz();if(!biz.stock)return;const s=biz.stock[i];confirmDel(`Excluir <strong>"${s.n}"</strong>?`,`()=>{getBiz().stock.splice(${i},1);rerender();updSbCounts();toast('Removido','ok')}`)}
 
-/* ══ EQUIPE ══ */
+/* -- EQUIPE -- */
 function vEqp(){
   const biz=getBiz();
   if(!biz.pros||!biz.pros.length)return `<div class="ph"><h1 class="ph-h">Equipe</h1></div><div class="c c-p" style="text-align:center;padding:40px"><p style="color:var(--t3);margin-bottom:14px">Nenhum profissional cadastrado</p><button class="btn btn-p btn-sm" onclick="openNewPro()">Adicionar profissional</button></div>`;
@@ -2183,7 +2342,7 @@ function saveEditPro(i){const biz=getBiz();const p=biz.pros[i];if(!p)return;p.n=
 function togglePro(i){const biz=getBiz();biz.pros[i].active=!biz.pros[i].active;rerender();toast('Status atualizado','ok')}
 function deletePro(i){const biz=getBiz();const p=biz.pros[i];confirmDel(`Excluir <strong>${p.n}</strong>?`,`()=>{getBiz().pros.splice(${i},1);rerender();toast('Removido','ok')}`)}
 
-/* ══ RELATÓRIOS ══ */
+/* -- RELATÓRIOS -- */
 function vRel(){
   const biz=getBiz();
   const rec=biz.transactions.filter(t=>t.tp==='receita').reduce((s,t)=>s+t.v,0);
@@ -2207,7 +2366,7 @@ function vRel(){
   </div>`;
 }
 
-/* ══ COMPARTILHAMENTO ══ */
+/* -- COMPARTILHAMENTO -- */
 function shareWhatsApp() {
   const biz = BK.biz || getBiz();
   if (!biz) return;
@@ -2263,7 +2422,7 @@ function openQRPortal() {
     </div>`);
 }
 
-/* ═══ TECLADO ═══ */
+/* --- TECLADO --- */
 document.addEventListener('keydown', e => {
   if ((e.metaKey||e.ctrlKey)&&e.key==='k') { e.preventDefault(); if(document.getElementById('app').classList.contains('on'))cpOpen(); }
   if (e.key==='Escape') { cpClose(); drwClose(); mdClose(); }
