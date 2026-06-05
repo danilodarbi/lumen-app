@@ -453,6 +453,7 @@ tbody tr:last-child td{border-bottom:0}
     <div class="bk-av" id="bk-av">?</div>
     <div class="bk-shn" id="bk-shn">—</div>
     <div class="bk-meta" id="bk-meta">—</div>
+    <div id="bk-seg-badge" style="display:inline-block;margin-top:6px;font-size:10.5px;font-weight:600;padding:2px 10px;border-radius:99px;border:1px solid"></div>
     <div id="bk-url-disp" onclick="copyBkLink()" style="display:inline-flex;align-items:center;gap:6px;background:var(--as);border:1px solid var(--ab);border-radius:99px;padding:3px 11px;font-size:10.5px;color:var(--a);font-family:var(--mono);margin-top:8px;cursor:pointer;transition:background .12s" onmouseenter="this.style.background='var(--ab)'" onmouseleave="this.style.background='var(--as)'">
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
       <span id="bk-url-txt">lumen.app/agendar/—</span>
@@ -564,6 +565,43 @@ tbody tr:last-child td{border-bottom:0}
   </div>
 </div>
 <script>
+const PALETTES = {"barbearia": {"a": "#B8860B", "ah": "#D4A017", "ad": "#8B6508", "as": "rgba(184,134,11,.09)", "ab": "rgba(184,134,11,.22)", "bg": "#0D0C09", "p1": "#121008", "label": "Barbearia"}, "clinica": {"a": "#0E8A8A", "ah": "#10ACAC", "ad": "#0A6666", "as": "rgba(14,138,138,.09)", "ab": "rgba(14,138,138,.22)", "bg": "#070F0F", "p1": "#0A1414", "label": "Clínica"}, "salao": {"a": "#C2688A", "ah": "#D4809E", "ad": "#8B3D5F", "as": "rgba(194,104,138,.09)", "ab": "rgba(194,104,138,.22)", "bg": "#0F090D", "p1": "#140B10", "label": "Salão"}, "petshop": {"a": "#2E8B57", "ah": "#38A868", "ad": "#1E6B40", "as": "rgba(46,139,87,.09)", "ab": "rgba(46,139,87,.22)", "bg": "#070F09", "p1": "#0A140C", "label": "Pet Shop"}, "odonto": {"a": "#2060C8", "ah": "#3070D8", "ad": "#1040A0", "as": "rgba(32,96,200,.09)", "ab": "rgba(32,96,200,.22)", "bg": "#07090F", "p1": "#0A0D15", "label": "Odonto"}, "academia": {"a": "#E05C20", "ah": "#F07030", "ad": "#A83C10", "as": "rgba(224,92,32,.09)", "ab": "rgba(224,92,32,.22)", "bg": "#0F0B07", "p1": "#140E08", "label": "Academia"}, "outro": {"a": "#6E56CF", "ah": "#7D66DE", "ad": "#5C45B8", "as": "rgba(110,86,207,.09)", "ab": "rgba(110,86,207,.22)", "bg": "#07080C", "p1": "#0D0F14", "label": "Negócio"}};
+
+function getPalette(type) {
+  if (!type) return PALETTES['outro'];
+  const t = type.toLowerCase().replace(/[^a-z]/g,'');
+  // Mapeamento de aliases
+  const map = {
+    'barbearia': 'barbearia', 'barber': 'barbearia',
+    'clinica': 'clinica', 'estetica': 'clinica', 'estetica': 'clinica',
+    'salao': 'salao', 'salao': 'salao', 'beleza': 'salao',
+    'petshop': 'petshop', 'pet': 'petshop', 'pets': 'petshop',
+    'odonto': 'odonto', 'odontologia': 'odonto', 'dentista': 'odonto',
+    'academia': 'academia', 'personal': 'academia', 'fitness': 'academia',
+  };
+  const key = map[t] || (PALETTES[t] ? t : 'outro');
+  return PALETTES[key] || PALETTES['outro'];
+}
+
+function applyPalette(type) {
+  const p = getPalette(type);
+  const r = document.documentElement.style;
+  r.setProperty('--a', p.a);
+  r.setProperty('--ah', p.ah);
+  r.setProperty('--ad', p.ad);
+  r.setProperty('--as', p.as);
+  r.setProperty('--ab', p.ab);
+}
+
+function resetPalette() {
+  const r = document.documentElement.style;
+  r.setProperty('--a', '#6E56CF');
+  r.setProperty('--ah', '#7D66DE');
+  r.setProperty('--ad', '#5C45B8');
+  r.setProperty('--as', 'rgba(110,86,207,.09)');
+  r.setProperty('--ab', 'rgba(110,86,207,.22)');
+}
+
 /* ---════════════════════════════════════════════
    DATABASE CENTRAL — multi-negócio
    Cada negócio tem: slug, login, tipo, dados próprios
@@ -580,7 +618,7 @@ const DB = {
       login: 'kowalski',
       pass: 'K0walski#2025',
       type: 'barbearia',
-      name: 'Barbearia Kowalski', slotMin: 60,
+      name: 'Barbearia Kowalski', slotMin: 60, color: '#B8860B',
       addr: 'Av. Beira-Mar, 142 · Guarapari · ES',
       phone: '(27) 99800-1234',
       active: true,
@@ -640,7 +678,7 @@ const DB = {
       login: 'draclara',
       pass: 'Clara#Est2025',
       type: 'clinica',
-      name: 'Clínica Dra. Clara', slotMin: 60,
+      name: 'Clínica Dra. Clara', slotMin: 60, color: '#0E8A8A',
       addr: 'Rua das Flores, 88 · Vitória · ES',
       phone: '(27) 99700-5678',
       active: true,
@@ -693,7 +731,7 @@ const DB = {
       login: 'belezaarte',
       pass: 'Beleza#Art2025',
       type: 'salao',
-      name: 'Beleza Arte Salão', slotMin: 60,
+      name: 'Beleza Arte Salão', slotMin: 60, color: '#C2688A',
       addr: 'Alameda Principal, 55 · Guarapari · ES',
       phone: '(27) 99600-9012',
       active: true,
@@ -814,11 +852,13 @@ function loginBiz() {
   enterBizApp();
 }
 function logoutRV() {
+  resetPalette();
   SESSION = { role:null, biz:null };
   document.getElementById('s-rv').classList.remove('on');
   document.getElementById('s-auth').classList.add('on');
 }
 function logoutBiz() {
+  resetPalette();
   SESSION = { role:null, biz:null };
   document.getElementById('app').classList.remove('on');
   document.getElementById('s-auth').classList.add('on');
@@ -900,7 +940,7 @@ function renderRV() {
   document.getElementById('rv-grid').innerHTML = bizs.map(b => `
     <div class="biz-card">
       <div class="biz-card-h">
-        <div class="biz-av" style="background:${b.color}">${ini(b.name)}</div>
+        <div class="biz-av" style="background:${getPalette(b.type).a}">${ini(b.name)}</div>
         <div style="flex:1;min-width:0">
           <div class="biz-n">${b.name}</div>
           <div class="biz-type">${getNicheLabel(b.type)} · ${b.addr.split('·')[0].trim()}</div>
@@ -941,7 +981,7 @@ function rvOpenBiz(id) {
   if (!biz) return;
   SESSION = { role:'rv-biz', biz };
   document.getElementById('s-rv').classList.remove('on');
-  enterBizApp();
+  enterBizApp(); // applyPalette já chamado dentro
 }
 function rvOpenPortal(id) {
   const biz = DB.businesses.find(b=>b.id===id);
@@ -1013,7 +1053,7 @@ function saveNewBiz() {
   DB.businesses.push({
     id:nid(), slug:login, login, pass, type, name:n,
     addr:`${city||'Brasil'}`, phone:tel||'', active:true,
-    color:COLORS[type]||'#5A8DC4',
+    color:getPalette(type).a,
     slotMin: 60,
     clients:[], agenda:[], services:getDefaultServices(type),
     pros:[], automations:getDefaultAutomations(), transactions:[], reviews:[], notifs:[]
@@ -1095,12 +1135,16 @@ function copyBkLink() {
 /* --- ENTER BIZ APP --- */
 function enterBizApp() {
   const biz = getBiz();
+  // Aplicar paleta do segmento
+  applyPalette(biz.type);
   // sidebar dinâmica por niche
   document.getElementById('sb-shopn').textContent = biz.name;
-  document.getElementById('sb-type-badge').innerHTML = `<span class="ch ${NICHE_CL[biz.type]}" style="font-size:9px">${NICHE_LABEL[biz.type]}</span>`;
+  const _p2 = getPalette(biz.type);
+  document.getElementById('sb-type-badge').innerHTML = `<span style="font-size:9px;font-weight:600;background:${_p2.as};color:${_p2.a};border:1px solid ${_p2.ab};border-radius:99px;padding:1px 7px">${getNicheLabel(biz.type)}</span>`;
   document.getElementById('tb-shop').textContent = biz.name;
   document.getElementById('sb-u-av').textContent = ini(biz.name);
-  document.getElementById('sb-u-av').style.background = biz.color;
+  const pal = getPalette(biz.type);
+  document.getElementById('sb-u-av').style.background = pal.a;
   document.getElementById('sb-u-n').textContent = biz.name;
   document.getElementById('sb-u-e').textContent = biz.login+'@lumen.app';
   buildSidebar(biz.type);
@@ -2025,6 +2069,8 @@ const BK = { biz:null, svc:null, pro:null, day:null, tm:null, fromDash:false };
 
 function openPortalFor(biz, fromDash=false) {
   BK.biz=biz; BK.fromDash=fromDash;
+  // Aplicar paleta do segmento no portal
+  applyPalette(biz.type);
   // atualizar cabeçalho
   const av=document.getElementById('bk-av');
   av.textContent=ini(biz.name); av.style.background=biz.color;
@@ -2034,6 +2080,18 @@ function openPortalFor(biz, fromDash=false) {
   const _url = _base + '#/agendar/' + biz.slug;
   const _urlEl = document.getElementById('bk-url-txt');
   if(_urlEl) _urlEl.textContent = _url.replace('https://','').replace('http://','');
+  // Cor do avatar do portal baseada no segmento
+  const _pal = getPalette(biz.type);
+  const _av = document.getElementById('bk-av');
+  if(_av) _av.style.background = _pal.a;
+  // Badge de segmento no portal
+  const _sb = document.getElementById('bk-seg-badge');
+  if(_sb) {
+    _sb.textContent = getNicheLabel(biz.type);
+    _sb.style.background = _pal.as;
+    _sb.style.color = _pal.a;
+    _sb.style.borderColor = _pal.ab;
+  }
   document.getElementById('bk-back-btn').textContent='← '+(fromDash?'Voltar ao painel':'Voltar ao login');
   document.getElementById('cf-shop').textContent=biz.name;
   document.getElementById('s-bk').classList.add('on');
@@ -2046,7 +2104,9 @@ function bkBackAction() {
   document.getElementById('s-bk').classList.remove('on');
   if (BK.fromDash) {
     document.getElementById('app').classList.add('on');
+    // Manter paleta do negócio
   } else {
+    resetPalette();
     document.getElementById('s-auth').classList.add('on');
   }
   bkReset();
