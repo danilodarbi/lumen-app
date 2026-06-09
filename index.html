@@ -700,7 +700,7 @@ function initSupabase() {
 }
 // Tentar inicializar quando CDN carregar
 if (document.readyState === 'complete') initSupabase();
-else window.addEventListener('load', () => setTimeout(initSupabase, 100));
+else // initSupabase moved to main load handler
 
 // ═══ SYNC FUNCTIONS ═══
 async function syncLoadFromCloud() {
@@ -1304,6 +1304,7 @@ function loginRV() {
   }
   SESSION = { role:'rv', biz:null };
   localStorage.setItem('lumen_session', JSON.stringify({role:'rv'}));
+  document.cookie = 'lumen_sess=rv;path=/;max-age=2592000;SameSite=Lax';
   document.getElementById('s-auth').classList.remove('on');
   document.getElementById('s-rv').classList.add('on');
   renderRV();
@@ -1320,12 +1321,14 @@ function loginBiz() {
   }
   SESSION = { role:'biz', biz };
   localStorage.setItem('lumen_session', JSON.stringify({role:'biz', slug:biz.slug}));
+  document.cookie = 'lumen_sess=biz:'+biz.slug+';path=/;max-age=2592000;SameSite=Lax';
   enterBizApp();
 }
 function logoutRV() {
   resetPalette();
   SESSION = { role:null, biz:null };
   localStorage.removeItem('lumen_session');
+  document.cookie = 'lumen_sess=;path=/;max-age=0';
   document.getElementById('s-rv').classList.remove('on');
   document.getElementById('s-auth').classList.add('on');
 }
@@ -1333,6 +1336,7 @@ function logoutBiz() {
   resetPalette();
   SESSION = { role:null, biz:null };
   localStorage.removeItem('lumen_session');
+  document.cookie = 'lumen_sess=;path=/;max-age=0';
   document.getElementById('app').classList.remove('on');
   document.getElementById('s-auth').classList.add('on');
 }
@@ -1455,6 +1459,7 @@ function rvOpenBiz(id) {
   if (!biz) return;
   SESSION = { role:'rv-biz', biz };
   localStorage.setItem('lumen_session', JSON.stringify({role:'rv-biz', slug:biz.slug}));
+  document.cookie = 'lumen_sess=rv-biz:'+biz.slug+';path=/;max-age=2592000;SameSite=Lax';
   document.getElementById('s-rv').classList.remove('on');
   enterBizApp();
 }
@@ -3262,6 +3267,9 @@ document.addEventListener('keydown', e => {
 
 // Carregar página de acordo com hash (simula URL de agendamento)
 window.addEventListener('load', () => {
+  // Inicializar Supabase
+  setTimeout(initSupabase, 100);
+
   // Portal de agendamento tem prioridade
   const hash = window.location.hash;
   const path = window.location.pathname;
@@ -3279,7 +3287,22 @@ window.addEventListener('load', () => {
 
   // Verificar sessão salva (auto-login)
   try {
-    const sess = JSON.parse(localStorage.getItem('lumen_session'));
+    let sess = null;
+    // Tentar localStorage
+    const lsSess = localStorage.getItem('lumen_session');
+    if (lsSess) {
+      sess = JSON.parse(lsSess);
+    }
+    // Fallback: cookie
+    if (!sess) {
+      const ck = document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('lumen_sess='));
+      if (ck) {
+        const val = ck.split('=')[1];
+        if (val === 'rv') sess = {role:'rv'};
+        else if (val.startsWith('biz:')) sess = {role:'biz', slug:val.split(':')[1]};
+        else if (val.startsWith('rv-biz:')) sess = {role:'rv-biz', slug:val.split(':')[1]};
+      }
+    }
     if (sess && sess.role) {
       if (sess.role === 'rv') {
         SESSION = { role:'rv', biz:null };
