@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Lumen · Plataforma de Gestão</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async defer onerror="console.warn('[Lumen] Supabase CDN indisponível')"></script>
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACkklEQVR4nNVWMYvUQBh975tkN7enKJxyoGgj2tgIVhZWYiHCWVnY+0vsbS1ELG0V7Cy94jhQFATBVvQ42FvlDjWb3WSeRXZjspvs5rxGvyqZ+fLel2/emxkG4QqWBQEtTWoIa5P01+htCY4SRyKg6l/L49aU3QZUnJvW7HiwKBswuGKcgFdWSRNQeq1FCGrGig/kR2lcHnFBlyx1tQ6xLYHkO+Gxs2duTFVKQF/726PxD9K1V1Y9AWlZlqxG67euPTI6KSMJ6Nmr2/3kYxj0pKMRABAg+WS8bzTJ0wyC4Fv1ZTlBXh9BGGkkSZsKSIcyXqMP8jpJApAg5cvAnHZJ1PpgHp5CRYkS89Yv/YNSBROCeZdpsgwVPM19XwNehZqswax9pkB5i3LElr2fsZtVEIsCCQKctD5P4HRFDre7BkWBNbUAJKaKF0ljYHRmTpU6KXjJNxOUElU6XIruSN6sI5/+jPs+GyfZeAaFZs5Ftb9WIZiUxUKkeeFmFnbC1Zeb96POicsX7qVZTBgISZICF+3sbe/03zgL59epzmhTZUqA4DUKXLT14aFZePfmiyg86ZWRICjA+3Slu/b6/YMvu1uB60rZDFidDyaagZR1Osc/724+fn41GR1sXH8qj1/DveHo+zD5FieDOBnEo0GcDNJ0OIsx0cMMgf485PPep2ZBLzq1vnYlGR1kfgjm+oLynnrWeq/YDUstKp8ehABnobPw4rmNS+fveGWQetHpwuUUBGQ+XemuBUHj1aREUBGrjG443n/36QlYCIuQRFIQc0HQy3eC3u7eW7Og1olccC+SfJYmTbMVlGaZLiIAYHRtCCRJvtawi85kAH5Odo3RsB382xev/5mg/cHfiqD2vGsZvwGyhiFnlaGsRwAAAABJRU5ErkJggg==">
@@ -433,8 +436,80 @@ tbody tr:last-child td{border-bottom:0}
 [data-theme="light"] .rv-stat:hover{border-color:var(--a)}
 [data-theme="light"] .cli-row:hover{background:var(--p2)}
 
-@media(max-width:860px){.sb{transform:translateX(-232px)}.sb.on{transform:none;box-shadow:0 20px 60px rgba(0,0,0,.5)}.main{margin-left:0}.tb-bgr{display:flex}.page{padding:16px 14px 40px}.svc-g{grid-template-columns:1fr}.tm-g{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:560px){.kpis,.g4{grid-template-columns:1fr}.rv-stats{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){
+  .sb{transform:translateX(-260px);width:260px}
+  .sb.on{transform:none;box-shadow:0 0 60px rgba(0,0,0,.6)}
+  .main{margin-left:0}
+  .tb-bgr{display:flex}
+  .page{padding:16px 14px 80px}
+  .svc-g{grid-template-columns:1fr}
+  .tm-g{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:1fr}
+  .stk{order:-1}
+  .f-row{grid-template-columns:1fr}
+  .kpis,.g4{grid-template-columns:1fr 1fr}
+  .ph-r{flex-direction:column;align-items:flex-start;gap:12px}
+  .c-h{flex-wrap:wrap;gap:8px}
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+}.sb.on{transform:none;box-shadow:0 20px 60px rgba(0,0,0,.5)}.main{margin-left:0}.tb-bgr{display:flex}.page{padding:16px 14px 40px}.svc-g{grid-template-columns:1fr}.tm-g{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){
+  .kpis,.g4{grid-template-columns:1fr}
+  .bk-body{padding:16px 12px}
+  .bk-q{font-size:18px}
+  .bk-h{padding:18px 14px 14px}
+  .svc-g{grid-template-columns:1fr}
+  .tm-g{grid-template-columns:repeat(3,1fr)}
+  .dy-g{grid-template-columns:repeat(5,1fr)}
+  .lo-w{padding:24px 16px}
+  .rv-body{padding:20px 14px}
+  .rv-grid{grid-template-columns:1fr}
+  table{font-size:11px}
+  th,td{padding:6px 8px}
+}.rv-stats{grid-template-columns:1fr 1fr}}
+
+/* Safe areas (iPhone notch) */
+@supports(padding:max(0px)){
+  .tb{padding-top:max(8px,env(safe-area-inset-top))}
+  .page{padding-bottom:max(40px,env(safe-area-inset-bottom))}
+  .bk-h{padding-top:max(20px,env(safe-area-inset-top))}
+  .b-btn{margin-bottom:max(12px,env(safe-area-inset-bottom))}
+}
+
+/* Touch targets */
+@media(pointer:coarse){
+  .btn{min-height:36px}
+  .btn-sm{min-height:32px}
+  .lo-btn,.b-btn{min-height:48px}
+  .sb-i{min-height:40px}
+  .lo-tab{min-height:40px}
+  .tm{min-height:44px;min-width:44px}
+  .dy{min-height:44px}
+  .svc{min-height:48px}
+  .pro{min-height:48px}
+}
+
+/* Portal mobile */
+@media(max-width:480px){
+  .bk-h{padding:16px 12px 12px}
+  .bk-av{width:42px;height:42px;border-radius:10px;font-size:16px}
+  .bk-shn{font-size:17px}
+  .bk-meta{font-size:11px}
+  .bk-body{padding:14px 10px}
+  .bk-q{font-size:17px;margin-bottom:4px}
+  .bk-sub{font-size:12px;margin-bottom:16px}
+  .svc{padding:12px 10px}
+  .svc-n{font-size:13px}
+  .b-btn{padding:14px;font-size:14px;border-radius:12px}
+  .bp{padding:10px 12px}
+  .succ h2{font-size:18px}
+  #bk-share-btns{flex-direction:column}
+  #bk-share-btns button{width:100%;justify-content:center}
+  .pro{padding:10px}
+  .tm{padding:10px 8px;font-size:13px}
+  .dy{padding:8px 6px}
+  .fld-i{padding:11px 12px;font-size:14px}
+  .fld-l{font-size:12px}
+}
 </style>
 </head><body>
 
@@ -3269,9 +3344,10 @@ document.addEventListener('keydown', e => {
 });
 
 // Carregar página de acordo com hash (simula URL de agendamento)
-window.addEventListener('load', () => {
-  // Inicializar Supabase
-  setTimeout(initSupabase, 100);
+// Auto-login: roda o mais cedo possível (DOMContentLoaded é mais rápido que load)
+function lumenBoot() {
+  // Supabase em background (não bloqueia)
+  setTimeout(initSupabase, 200);
 
   // Portal de agendamento tem prioridade
   const hash = window.location.hash;
@@ -3288,15 +3364,11 @@ window.addEventListener('load', () => {
     return;
   }
 
-  // Verificar sessão salva (auto-login)
+  // Verificar sessão salva (auto-login via localStorage + cookie)
   try {
     let sess = null;
-    // Tentar localStorage
     const lsSess = localStorage.getItem('lumen_session');
-    if (lsSess) {
-      sess = JSON.parse(lsSess);
-    }
-    // Fallback: cookie
+    if (lsSess) sess = JSON.parse(lsSess);
     if (!sess) {
       const ck = document.cookie.split(';').map(c=>c.trim()).find(c=>c.startsWith('lumen_sess='));
       if (ck) {
@@ -3307,48 +3379,42 @@ window.addEventListener('load', () => {
       }
     }
     if (sess && sess.role) {
+      // FORÇAR: esconder tudo antes de mostrar a tela correta
+      document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+
       if (sess.role === 'rv') {
         SESSION = { role:'rv', biz:null };
-        // Esconder TODAS as telas primeiro
-        document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-        // Mostrar painel do revendedor
         document.getElementById('s-rv').classList.add('on');
         renderRV();
-        setTimeout(() => toast('Bem-vindo de volta!', 'ok'), 300);
         return;
       }
       if ((sess.role === 'biz' || sess.role === 'rv-biz') && sess.slug) {
         const biz = DB.businesses.find(b=>b.slug===sess.slug&&b.active);
         if (biz) {
           SESSION = { role:sess.role, biz };
-          // Esconder TODAS as telas primeiro
-          document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
           enterBizApp();
-          setTimeout(() => toast('Bem-vindo de volta!', 'ok'), 300);
           return;
         }
       }
     }
-  } catch(e) {}
+  } catch(e) { console.warn('[Lumen] Auto-login erro:', e); }
 
   // Nenhuma sessão — mostrar login
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
   document.getElementById('s-auth').classList.add('on');
-  // Debug: mostrar estado da sessão
-  setTimeout(() => {
-    const dbg = document.getElementById('lo-debug');
-    if (dbg) {
-      const ls = localStorage.getItem('lumen_session');
-      const ck = document.cookie.includes('lumen_sess');
-      const ver = localStorage.getItem('lumen_version');
-      dbg.textContent = 'v' + (typeof LUMEN_VERSION!=='undefined'?LUMEN_VERSION:'?') + ' | ls:' + (ls?'sim':'não') + ' | ck:' + (ck?'sim':'não');
-    }
-  }, 200);
 
   // Sync Supabase em background
   setTimeout(() => {
     syncLoadFromCloud().then(ok => {
-      if (ok) console.log('[Lumen] Dados sincronizados do Supabase');
-    }).catch(e => console.warn('[Lumen] Supabase offline'));
-  }, 500);
-});
+      if (ok) console.log('[Lumen] Supabase sync OK');
+    }).catch(() => {});
+  }, 1000);
+}
+
+// Rodar o boot no primeiro evento disponível
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', lumenBoot);
+} else {
+  lumenBoot(); // DOM já está pronto (script no final do body)
+}
 </script></body></html>
