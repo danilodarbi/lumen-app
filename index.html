@@ -782,7 +782,8 @@ function resetPalette() {
    DATABASE CENTRAL — multi-negócio
    Cada negócio tem: slug, login, tipo, dados próprios
 ════════════════════════════════════════════--- */
-const DB = {
+// ═══ PERSISTÊNCIA ═══
+const DB_DEFAULT = {
   // conta do revendedor
   reseller: { email:'admin@lumen.app', pass:'Lumen@Admin25', name:'Danilo Lumen' },
 
@@ -952,7 +953,101 @@ const DB = {
       ],
     }
   ]
-};
+};;
+
+// Carregar dados do localStorage ou usar default
+let DB;
+try {
+  const saved = localStorage.getItem('lumen_db');
+  if (saved) {
+    DB = JSON.parse(saved);
+    // Garantir que campos novos existam em negócios antigos
+    DB.businesses.forEach(b => {
+      if (!b.clients) b.clients = [];
+      if (!b.agenda) b.agenda = [];
+      if (!b.services) b.services = [];
+      if (!b.pros) b.pros = [];
+      if (!b.automations) b.automations = [];
+      if (!b.transactions) b.transactions = [];
+      if (!b.reviews) b.reviews = [];
+      if (!b.notifs) b.notifs = [];
+      if (!b.stock) b.stock = [];
+      if (!b.plans) b.plans = [];
+      if (!b.slotMin) b.slotMin = 60;
+    });
+    console.log('[Lumen] Dados carregados do localStorage (' + DB.businesses.length + ' negócios)');
+  } else {
+    DB = JSON.parse(JSON.stringify(DB_DEFAULT));
+    console.log('[Lumen] Primeiro acesso — dados demo carregados');
+  }
+} catch(e) {
+  console.warn('[Lumen] Erro ao carregar localStorage, usando default:', e);
+  DB = JSON.parse(JSON.stringify(DB_DEFAULT));
+}
+
+// Salvar DB no localStorage
+function saveDB() {
+  try {
+    localStorage.setItem('lumen_db', JSON.stringify(DB));
+  } catch(e) {
+    console.warn('[Lumen] Erro ao salvar:', e);
+    // Se localStorage estiver cheio, avisar
+    if (e.name === 'QuotaExceededError') {
+      toast('Armazenamento cheio. Exporte seus dados.', 'err');
+    }
+  }
+}
+
+// Resetar para dados demo (útil para debug)
+function resetDB() {
+  if (!confirm('Tem certeza? Isso vai apagar TODOS os dados e restaurar os dados de demonstração.')) return;
+  DB = JSON.parse(JSON.stringify(DB_DEFAULT));
+  saveDB();
+  location.reload();
+}
+
+// Exportar dados como JSON
+function exportData() {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lumen_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup baixado', 'ok');
+}
+
+// Importar dados de JSON
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (data.reseller && data.businesses) {
+          DB.reseller = data.reseller;
+          DB.businesses = data.businesses;
+          saveDB();
+          toast('Dados importados! Recarregando...', 'ok');
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          toast('Arquivo inválido', 'err');
+        }
+      } catch(err) {
+        toast('Erro ao ler arquivo', 'err');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
 
 /* --- HELPERS --- */
 let _seq = 900;
@@ -1104,6 +1199,7 @@ function saveEditCreds(id) {
   toast(`Credenciais de ${b.name} atualizadas ✓`,'ok');
 }
 function renderRV() {
+  saveDB(); // Persistir dados do revendedor
   const bizs = DB.businesses;
   const active = bizs.filter(b=>b.active).length;
   const totalClients = bizs.reduce((s,b)=>s+b.clients.length,0);
@@ -1426,7 +1522,7 @@ function saveEditBiz(id) {
     b.color = ca; // atualizar cor principal
   }
 
-  mdClose(); renderRV(); toast('Negócio atualizado','ok');
+  saveDB(); mdClose(); renderRV(); toast('Negócio atualizado','ok');
 }
 function rvDeleteBiz(id) {
   const b = DB.businesses.find(x=>x.id===id); if(!b) return;
@@ -1548,7 +1644,7 @@ function render(v) {
     document.querySelectorAll('[data-w]').forEach(b => { b.style.width='0'; requestAnimationFrame(()=>b.style.width=b.dataset.w); });
   });
 }
-function rerender() { render(CUR_V); updSbCounts(); }
+function rerender() { render(CUR_V); updSbCounts(); saveDB(); }
 function abrirPortal() {
   const biz = getBiz(); if (!biz) return;
   openPortalFor(biz, true);
@@ -1920,7 +2016,7 @@ function saveNewAppt() {
     pro: pr?pr.n:'—', dt:dtFmt, tm,
     st:'confirmado', p:sv.p, dur:durVal
   });
-  mdClose(); rerender(); toast(`Agendado: ${c.n} — ${tm} (${durVal}min)`,'ok');
+  saveDB(); mdClose(); rerender(); toast(`Agendado: ${c.n} — ${tm} (${durVal}min)`,'ok');
 }
 function whatsapp(name, phone) {
   const msg = encodeURIComponent(`Oi ${name.split(' ')[0]}, tudo bem? Passando para avisar sobre seu horário. Qualquer dúvida estamos aqui!`);
@@ -2038,7 +2134,7 @@ function saveEditClient(id) {
   c.ph = document.getElementById('ec-ph').value.trim()||c.ph;
   c.t = document.getElementById('ec-t').value;
   c.nt = document.getElementById('ec-nt').value.trim();
-  mdClose(); rerender(); toast('Cliente atualizado','ok');
+  saveDB(); mdClose(); rerender(); toast('Cliente atualizado','ok');
   setTimeout(()=>openClient(id),150);
 }
 function deleteClient(id) {
@@ -2174,7 +2270,7 @@ function saveEditSvc(i) {
   s.n=document.getElementById('es-n').value.trim()||s.n;
   const np=parseFloat(document.getElementById('es-p').value); if(np>0) s.p=np;
   const nd=parseInt(document.getElementById('es-d').value); if(nd>=5) s.dur=nd;
-  mdClose(); rerender(); toast('Serviço atualizado','ok');
+  saveDB(); mdClose(); rerender(); toast('Serviço atualizado','ok');
 }
 function toggleSvc(i) { getBiz().services[i].active=!getBiz().services[i].active; rerender(); updSbCounts(); toast('Status atualizado','ok'); }
 function deleteSvc(i) {
@@ -2223,7 +2319,7 @@ function saveEditAuto(id) {
   const a=getBiz().automations.find(x=>x.id===id); if(!a) return;
   a.n=document.getElementById('ea-n').value.trim()||a.n;
   a.desc=document.getElementById('ea-d').value.trim()||a.desc;
-  mdClose(); rerender(); toast('Atualizado','ok');
+  saveDB(); mdClose(); rerender(); toast('Atualizado','ok');
 }
 function openNewAuto() {
   mdOpen(`${X_MD}
@@ -2330,6 +2426,27 @@ function vConfig() {
           <div style="font-size:11px;color:var(--t3);margin-top:4px">Define o espaçamento entre horários no portal de agendamento</div>
         </div>
         <button class="btn btn-p" onclick="saveCfg()">Salvar</button>
+
+        <div style="margin-top:28px;padding-top:18px;border-top:1px solid var(--br)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t2)"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            <strong style="font-size:12px;color:var(--t0)">Dados e backup</strong>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-g btn-sm" onclick="exportData()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Exportar backup
+            </button>
+            <button class="btn btn-g btn-sm" onclick="importData()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              Importar backup
+            </button>
+            <button class="btn btn-r btn-sm" onclick="resetDB()">Resetar dados</button>
+          </div>
+          <div style="font-size:10.5px;color:var(--t3);margin-top:8px;line-height:1.5">
+            Seus dados ficam salvos neste navegador. Exporte backup regularmente para não perder informações.
+          </div>
+        </div>
       </div>
       <div class="c c-p">
         <div class="m-l" style="margin-bottom:12px">Alterar senha</div>
@@ -2374,7 +2491,7 @@ function saveCfg() {
   if(slot>0) biz.slotMin=slot;
   document.getElementById('sb-shopn').textContent=biz.name;
   document.getElementById('tb-shop').textContent=biz.name;
-  toast('Configurações salvas','ok');
+  saveDB(); toast('Configurações salvas','ok');
 }
 function savePw() {
   const pw=document.getElementById('cfg-pw').value, pw2=document.getElementById('cfg-pw2').value;
@@ -2592,7 +2709,7 @@ function bkConfirm() {
   const pr=biz.pros.find(x=>x.id===BK.pro);
   const cod='#AG'+String(biz.agenda.length+1).padStart(4,'0');
   biz.agenda.push({id:nid(),cid:0,cn:nm,sv:sv?.n||'',pro:pr?.n||'',dt:String(BK.day).padStart(2,'0')+'/06/2025',tm:BK.tm,st:'confirmado',p:sv?.p||0,dur:biz.slotMin||60});
-  biz.notifs.unshift({id:nid(),t:'Novo agendamento: '+nm+' — '+(sv?.n||'')+' em '+BK.day+'/06 às '+BK.tm,d:'agora',read:false});
+  saveDB(); biz.notifs.unshift({id:nid(),t:'Novo agendamento: '+nm+' — '+(sv?.n||'')+' em '+BK.day+'/06 às '+BK.tm,d:'agora',read:false});
   document.getElementById('b-s5').className='bk-step';
   document.getElementById('b-ok').className='bk-step on';
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
