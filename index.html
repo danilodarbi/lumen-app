@@ -368,7 +368,7 @@ tbody tr:last-child td{border-bottom:0}
 ::-webkit-scrollbar-thumb{background:var(--br2);border-radius:99px}
 ::-webkit-scrollbar-thumb:hover{background:var(--br3)}
 .page{scroll-behavior:smooth}
-.sb-ov{display:none;position:fixed;inset:0;z-index:49;background:rgba(0,0,0,.55);backdrop-filter:blur(3px)}
+.sb-ov{display:none;position:fixed;inset:0;z-index:49;background:rgba(0,0,0,.6);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .sb-ov.on{display:block;animation:fadeI .16s}
 
 /* Tema light para o painel interno */
@@ -437,6 +437,7 @@ tbody tr:last-child td{border-bottom:0}
 [data-theme="light"] .cli-row:hover{background:var(--p2)}
 
 @media(max-width:860px){
+  #sb-close-btn{display:flex!important}
   .sb{transform:translateX(-260px);width:260px}
   .sb.on{transform:none;box-shadow:0 0 60px rgba(0,0,0,.6)}
   .main{margin-left:0}
@@ -588,9 +589,10 @@ tbody tr:last-child td{border-bottom:0}
 
 <!-- ═══ APP (painel do negócio) ═══ -->
 <div class="ap" id="app">
-  <div class="sb-ov" id="sb-ov" onclick="sbClose()"></div>
+  <div class="sb-ov" id="sb-ov" onclick="sbClose()" ontouchstart="sbClose()"></div>
 <aside class="sb" id="sb">
     <div class="sb-h">
+      <button onclick="sbClose()" style="display:none;position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:6px;background:var(--p3);border:1px solid var(--br);color:var(--t2);cursor:pointer;font-size:14px;align-items:center;justify-content:center;z-index:5" id="sb-close-btn">✕</button>
       <div class="sb-brand">
         <div class="sb-mk"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQLZIOYWuA2EkQtg2IXV5SUAJkB4DYRSFBzkB2CpCtkY7ETkJiJxcUgdT3ANk2uTmlyQh3M/Ck5oUGA2kOIJZhKGYIYnBncAL5H6IkfxEDg8VXBgbmCQixpJkMDNtbGRgkbiHEVBYwMPC3MDBsO48QQ4RJQWJRIliIBYiZ0tIYGD4tZ2DgjWRgEL7AwMAVDQsIHG5TALvNnSEfCNMZchhSgSKeDHkMyQx6QJYRgwGDIYMZAKbWPz9HbOBQAAACkklEQVR4nNVWMYvUQBh975tkN7enKJxyoGgj2tgIVhZWYiHCWVnY+0vsbS1ELG0V7Cy94jhQFATBVvQ42FvlDjWb3WSeRXZjspvs5rxGvyqZ+fLel2/emxkG4QqWBQEtTWoIa5P01+htCY4SRyKg6l/L49aU3QZUnJvW7HiwKBswuGKcgFdWSRNQeq1FCGrGig/kR2lcHnFBlyx1tQ6xLYHkO+Gxs2duTFVKQF/726PxD9K1V1Y9AWlZlqxG67euPTI6KSMJ6Nmr2/3kYxj0pKMRABAg+WS8bzTJ0wyC4Fv1ZTlBXh9BGGkkSZsKSIcyXqMP8jpJApAg5cvAnHZJ1PpgHp5CRYkS89Yv/YNSBROCeZdpsgwVPM19XwNehZqswax9pkB5i3LElr2fsZtVEIsCCQKctD5P4HRFDre7BkWBNbUAJKaKF0ljYHRmTpU6KXjJNxOUElU6XIruSN6sI5/+jPs+GyfZeAaFZs5Ftb9WIZiUxUKkeeFmFnbC1Zeb96POicsX7qVZTBgISZICF+3sbe/03zgL59epzmhTZUqA4DUKXLT14aFZePfmiyg86ZWRICjA+3Slu/b6/YMvu1uB60rZDFidDyaagZR1Osc/724+fn41GR1sXH8qj1/DveHo+zD5FieDOBnEo0GcDNJ0OIsx0cMMgf485PPep2ZBLzq1vnYlGR1kfgjm+oLynnrWeq/YDUstKp8ehABnobPw4rmNS+fveGWQetHpwuUUBGQ+XemuBUHj1aREUBGrjG443n/36QlYCIuQRFIQc0HQy3eC3u7eW7Og1olccC+SfJYmTbMVlGaZLiIAYHRtCCRJvtawi85kAH5Odo3RsB382xev/5mg/cHfiqD2vGsZvwGyhiFnlaGsRwAAAABJRU5ErkJggg==" style="width:100%;height:100%;object-fit:cover;border-radius:5px"></div>
         <div style="flex:1;min-width:0">
@@ -1913,14 +1915,24 @@ function go(v) {
   window.scrollTo({top:0});
 }
 function sbToggle() {
-  const sb=document.getElementById('sb'), ov=document.getElementById('sb-ov');
+  const sb = document.getElementById('sb');
+  const ov = document.getElementById('sb-ov');
   const isOpen = sb.classList.contains('on');
-  if(isOpen) { sb.classList.remove('on'); if(ov) ov.classList.remove('on'); }
-  else { sb.classList.add('on'); if(ov) ov.classList.add('on'); }
+  if (isOpen) {
+    sb.classList.remove('on');
+    if (ov) { ov.classList.remove('on'); ov.style.display = 'none'; }
+  } else {
+    sb.classList.add('on');
+    if (ov && window.innerWidth <= 860) { ov.style.display = 'block'; ov.classList.add('on'); }
+  }
 }
 function sbClose() {
-  document.getElementById('sb')?.classList.remove('on');
-  document.getElementById('sb-ov')?.classList.remove('on');
+  const sb = document.getElementById('sb');
+  const ov = document.getElementById('sb-ov');
+  if (sb) sb.classList.remove('on');
+  if (ov) { ov.classList.remove('on'); ov.style.display = 'none'; }
+  // Forçar repaint
+  document.body.offsetHeight;
 }
 function render(v) {
   const F = {dash:vDash,hoje:vHoje,agenda:vAgenda,opp:vOpp,ai:vAI,clientes:vClientes,recor:vRecor,aval:vAval,mkt:vMkt,auto:vAuto,svc:vSvc,est:vEst,eqp:vEqp,fin:vFin,rel:vRel,config:vConfig};
