@@ -3309,18 +3309,22 @@ window.addEventListener('load', () => {
     if (sess && sess.role) {
       if (sess.role === 'rv') {
         SESSION = { role:'rv', biz:null };
+        // Esconder TODAS as telas primeiro
+        document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+        // Mostrar painel do revendedor
         document.getElementById('s-rv').classList.add('on');
         renderRV();
-        console.log('[Lumen] Sessão restaurada: revendedor');
-        setTimeout(() => toast('Sessão restaurada automaticamente', 'ok'), 300);
+        setTimeout(() => toast('Bem-vindo de volta!', 'ok'), 300);
         return;
       }
       if ((sess.role === 'biz' || sess.role === 'rv-biz') && sess.slug) {
         const biz = DB.businesses.find(b=>b.slug===sess.slug&&b.active);
         if (biz) {
           SESSION = { role:sess.role, biz };
+          // Esconder TODAS as telas primeiro
+          document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
           enterBizApp();
-          console.log('[Lumen] Sessão restaurada: ' + biz.name);
+          setTimeout(() => toast('Bem-vindo de volta!', 'ok'), 300);
           return;
         }
       }
